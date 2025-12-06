@@ -2,44 +2,138 @@
 
 import os
 
+#variables
 sus_words = (
-    "powershell -nop",
-    "cmd.exe",
-    "base64",
-    "mimikatz",
-    "token",)
+    b"powershell -nop",
+    b"cmd.exe" ,
+    b"base64",
+    b"mimikatz",
+    b"token",
+    b"wget",
+    b"curl" ,
+    b"iex",
+    b"invoke-webrequest",
+    b"invoke-expression" ,
+    b"netstat",
+    b"nc",
+    b"nc.exe",
+    b"ftp",
+    b"rclone",
+    b"nc64",
+    b"powershell.exe",
+    b"cmd.exe /c",
+    b"add-type",
+    b"new-object",
+    b"system.net.webclient",
+    b"system.io.streamreader",
+    b"system.io.filestream",
+    b"system.diagnostics.process" ,
+    b"createobject",
+    b"shell.application",
+    b"mshta" ,
+    b"runas",
+    b"sc stop",
+    b"sc start",
+    b"sc create",
+    b"powershell -exec bypass",
+    b"cmd /c",
+    b"certutil",
+    b"invoke-command",
+    b"get-credentials",
+    b"downloadfile",
+    b"uploadfile",
+    b"encrypted",
+    b"reverse shell",
+    b"webshell",
+    b"powershell -encodedcommand",
+    b"certutil -decode",
+    b"msfvenom",
+    b"metasploit",
+    b"meterpreter",
+    b"vnc",
+    b"rdp",
+    b"winrm",
+    b"ssh",
+    b"telnet",
+    b"keylogger" ,
+    b"backdoor",
+    b"spyware",
+    b"trojan",
+    b"rootkit",
+    b"cobalt strike",
+    b"stager",
+    b"payload",
+    b"beacon",
+    b"exfil",
+    b"attack",
+    b"exploit",
+    b"bypass",
+    b"lolbin", 
+    b"dropper",
+    b"reverse_tcp",
+    b"steganography",
+    b"socket",
+    b"proxy",
+    b"privilege escalation" ,
+    b"local privilege escalation",
+    b"ephemeral",
+    b"bind shell",
+    b"execution policy", 
     
-sus_ext = (
-    ".exe",
-    ".dll", 
-    ".ps1",
-    ".bat", 
-    ".vbs")
+    
+)
 
+sus_ext = {
+    ".exe" ,  
+    ".dll",
+    ".ps1", 
+    ".bat",
+    ".vbs",
+}
+
+filesize = 50 * 1024  * 1024    
+
+#functions
 def scan_file(path):
-    
-    sus_file = [] 
-    
+    results = []
+
+    if not os.path.isfile(path):
+        print("Error: path does not exist or is not a file.")
+        return
+
     ext = os.path.splitext(path)[1].lower()
     if ext in sus_ext:
-        sus_file.append(f"suspicious ext: {ext}")
-        
+        results.append(f"suspicious ext: {ext}")
+
     try:
-        with open(path, "r", errors="ignore") as f:
-            content = f.read().lower()
+        size = os.path.getsize(path)
+        if size > filesize:
+            results.append("file too large to scan safely")
+            print("potentially suspicious file:" )
+            for f in results:
+                print(f"  - {f}")
+            return
+    except OSError as e:
+        print(f"Could not stat file: {e}" ) 
+        return
+
+    try:
+        with open(path, "rb") as f:
+            filename = f.read().lower()
             for keyword in sus_words:
-                if keyword in content:
-                    sus_file.append(f"suspicious keyword: {keyword}")
-    except:
-        sus_file.append("could not read")
-    
-    if sus_file:
-        print("suspicious files")
-        for f in sus_file:
-            print(f"{f}")
+                if keyword in filename:
+                    results.append( f"suspicious keyword: {keyword.decode('utf-8', 'ignore')}")
+    except OSError as e:
+        results.append(f"could not read file: {e}")
+
+    if results:
+        print("potentially suspicious file:" )
+        for f_item in results:
+            print(f"  - {f_item}")
     else:
-        print("nothing suspicious found")
-        
-if __name__ =="__main__":
-    path = input("please input path")
+        print( "nothing suspicious found  ")
+
+#running
+if __name__ == "__main__":
+    path = input("Please input path: ").strip()
     scan_file(path)
