@@ -1,0 +1,45 @@
+#this will be used to identify potentially malicous files
+
+import os
+
+sus_words = (
+    "powershell -nop",
+    "cmd.exe",
+    "base64",
+    "mimikatz",
+    "token",)
+    
+sus_ext = (
+    ".exe",
+    ".dll", 
+    ".ps1",
+    ".bat", 
+    ".vbs")
+
+def scan_file(path):
+    
+    sus_file = [] 
+    
+    ext = os.path.splitext(path)[1].lower()
+    if ext in sus_ext:
+        sus_file.append(f"suspicious ext: {ext}")
+        
+    try:
+        with open(path, "r", errors="ignore") as f:
+            content = f.read().lower()
+            for keyword in sus_words:
+                if keyword in content:
+                    sus_file.append(f"suspicious keyword: {keyword}")
+    except:
+        sus_file.append("could not read")
+    
+    if sus_file:
+        print("suspicious files")
+        for f in sus_file:
+            print(f"{f}")
+    else:
+        print("nothing suspicious found")
+        
+if __name__ =="__main__":
+    path = input("please input path")
+    scan_file(path)
